@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+
+  --color-primary: #56C38B; 
+  --color-primary-dark: #3E9D6D;
+  --color-secondary: #5BC0EB;
+  --color-accent: #F9A43E;
+  --color-danger: #F45D48;
+  --color-bg: #FFFDF7;
+  --color-border: rgba(0,0,0,0.06);
+  --color-text-main: #2D334A;
+  --color-text-muted: #7A7F9A;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-bg text-text-main antialiased selection:bg-primary/20 overflow-x-hidden;
+    background-image: radial-gradient(circle at 100% 0%, rgba(86, 195, 139, 0.08) 0%, transparent 25%),
+                      radial-gradient(circle at 0% 100%, rgba(249, 164, 62, 0.08) 0%, transparent 25%);
+    background-attachment: fixed;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight text-text-main;
+  }
+}
+
+.sleek-card {
+  @apply bg-white border border-border rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] transition-all duration-500 hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)];
+}
+
+.lesson-path {
+  @apply flex flex-col items-center gap-10 py-20 relative;
+}
+
+.lesson-node {
+  @apply w-[6rem] h-[6rem] rounded-full flex items-center justify-center transition-all duration-500 relative z-10 cursor-pointer border-[8px];
+  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.08);
+}
+
+.lesson-node:active:not(.locked) {
+  transform: translateY(6px);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+.lesson-node.completed {
+  @apply bg-white border-primary text-primary hover:bg-emerald-50/80;
+}
+
+.lesson-node.current {
+  @apply bg-white border-accent text-accent scale-[1.2] shadow-2xl shadow-accent/20 transition-all duration-500;
+  box-shadow: 0 12px 0 rgba(245, 158, 11, 0.2);
+}
+
+.lesson-node.locked {
+  @apply bg-slate-50/50 border-slate-100 text-slate-200 cursor-not-allowed;
+  box-shadow: none;
+}
+
+.path-line {
+  @apply absolute w-2 bg-slate-100 top-24 bottom-24 left-1/2 -translate-x-1/2 -z-0 rounded-full shadow-inner opacity-40;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.btn-3d {
+  @apply relative transition-all duration-200 active:translate-y-1 active:shadow-none font-black uppercase tracking-widest;
+  box-shadow: 0 5px 0 currentColor;
+}

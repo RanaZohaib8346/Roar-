@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Primitives
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'totalXP', 'streak']) &&
+             data.uid is string && data.uid.size() <= 128 &&
+             data.email is string && data.email.size() <= 256 &&
+             data.totalXP is number &&
+             data.streak is number;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().uid == userId;
+      allow update: if isOwner(userId) && (
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'totalXP', 'streak', 'gems', 'lastActive', 'selectedCourseId', 
+          'displayName', 'photoURL', 'learningLevel'
+        ]) &&
+        isValidUser(incoming())
+      );
+    }
+
+    // --- COURSES & LESSONS ---
+    match /courses/{courseId} {
+      allow get, list: if isSignedIn();
+    }
+
+    match /lessons/{lessonId} {
+      allow get, list: if isSignedIn();
+    }
+
+    // --- PROGRESS ---
+    function isValidProgress(data) {
+      return data.keys().hasAll(['userId', 'lessonId', 'completed']) &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.lessonId is string && data.lessonId.size() <= 128 &&
+             data.completed is bool;
+    }
+
+    match /users/{userId}/progress/{progressId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidProgress(incoming()) && incoming().userId == userId;
+      allow update: if isOwner(userId) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['completed', 'completedAt']) && isValidProgress(incoming())
+      );
+    }
+  }
+}
